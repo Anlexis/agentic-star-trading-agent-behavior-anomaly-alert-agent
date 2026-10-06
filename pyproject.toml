@@ -1,0 +1,53 @@
+[project]
+name = "fin-c2-105"
+version = "0.1.0"
+description = "TradingAgentAnomalyAlertAgent — AgentCore Template"
+requires-python = ">=3.11"
+# The framework (agenticstar-agentcore) is NOT a public-PyPI dependency; it is
+# provided by CI per repository generation — a stub package on PYTHONPATH for older repos,
+# or installed from the package registry for wheel-era repos (see the dual-mode
+# run-tests job in the pipeline definition). Pinning it here would make `pip install -e .`
+# fail because it is not resolvable from the default index.
+dependencies = [
+    "agenticstar-agentcore[marketplace,openai]==1.0.3",]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.1.1",
+    "pytest-cov==5.0.0",
+    "pytest-asyncio==0.23.6",
+    "ruff==0.4.4",
+    "mypy==1.10.0",
+]
+
+[build-system]
+requires = ["setuptools==68.2.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+# The framework wheel ships no type information, so every framework base class
+# resolves to Any. Without this, `class X(FunctionNode)` is an error in itself and
+# the real findings are buried under one per subclass.
+disallow_subclassing_any = false
+# src/examples/ holds the published sample graphs. They are illustrative code kept
+# byte-stable for the next template author, so they are excluded rather than
+# annotated.
+exclude = "^src/examples/"
+
+[[tool.mypy.overrides]]
+module = ["framework.*", "shared.*", "langgraph.*", "langchain_core.*", "yaml"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# AgentState comes from the untyped wheel and therefore resolves to Any, which
+# makes `class State(AgentState)` fail `valid-type` on EVERY field. The individual
+# field errors all have that one cause; suppressing them at the module keeps the
+# rest of the strict checking intact.
+module = ["src.schemas.state"]
+disable_error_code = ["valid-type"]

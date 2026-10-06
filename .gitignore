@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+.env
+*.egg
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+
+# Reference files placed locally at scaffold init — never tracked in a template repository.
+# These files are placed locally for reference at scaffold init time but must not be tracked.
+CLAUDE.md
+security_rules/
+ci_stubs/
+MANIFEST.md

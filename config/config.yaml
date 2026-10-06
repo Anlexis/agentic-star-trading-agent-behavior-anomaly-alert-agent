@@ -1,0 +1,39 @@
+# Runtime parameters — loaded by AgentRegistry and passed as Graph(config=...).
+# Separate from config/agent.yaml (the static manifest).
+#
+# Every value below is READ AT RUNTIME. The graph loads this file when it is
+# constructed without a config, injects `anomaly:` into the detection node's
+# constructor, and validates the block before compiling — so a value changed here
+# changes what the agent detects, and a malformed one stops the graph instead of
+# silently reverting to a default.
+
+max_retry: 3
+timeout_s: 30
+
+# Detection thresholds. A caller may override any of these per request through the
+# `thresholds` block of the submitted payload; both paths are validated against
+# the same bounds table (src/nodes/anomaly_analyze_node.ANOMALY_CONFIG_BOUNDS).
+anomaly:
+  # Share of the trade log a single instrument may hold before it is reported.
+  concentration_threshold: 0.40
+  # Multiple of the rolling median latency that counts as a spike.
+  latency_spike_multiplier: 3.0
+  # Median used when the submitted log carries no usable latency series (ms).
+  latency_baseline_ms: 100.0
+  # Largest tolerated shift in any confidence bucket against the caller's baseline.
+  drift_bucket_delta: 0.20
+  # Window within which two algorithms trading counts as correlated (seconds).
+  coordination_window_sec: 2.0
+  # Orders in a single submitted log above which a policy breach is reported.
+  order_count_ceiling: 1000
+  # Policy tags whose presence is always a critical finding.
+  forbidden_policy_tags:
+    - HALT
+    - BLOCKED
+    - RESTRICTED
+
+# Structural ceilings applied to a submission. An over-large trade log is refused,
+# never truncated: a truncated log produces an alert about a log nobody sent.
+limits:
+  max_input_bytes: 262144
+  max_trade_log_entries: 2000
